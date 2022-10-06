@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+
+source ~/.configs/zshrc-asdf
+
+export OPENAI_API_KEY=""
+
+python natbot.py

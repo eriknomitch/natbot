@@ -11,7 +11,11 @@ from sys import argv, exit, platform
 import openai
 import os
 
-INIT_URL = "https://news.ycombinator.com"
+INIT_URL = False
+
+INIT_URL = "https://codepen.io/eriknomitch/full/RwyBvvO"
+
+# INIT_URL = "https://news.ycombinator.com"
 
 quiet = False
 if len(argv) > 1 and (argv[1] == "-q" or argv[1] == "--quiet"):
@@ -33,7 +37,8 @@ You can issue these commands:
   CLICK X - click on a given element. You can only click on links, buttons, and inputs!
   TYPE X "TEXT" - type the specified text into the input with id X
   TYPESUBMIT X "TEXT" - same as TYPE above, except then it presses ENTER to submit the form
-    PRINT X "TEXT" - print the specified text to the console
+  PRINT X "TEXT" - print the specified text to the console
+  OPEN X "URL" - open the specified URL
 
 The format of the browser content is highly simplified; all formatting elements are stripped.
 Interactive elements such as links, inputs, buttons are represented like this:
@@ -600,6 +605,13 @@ if __name__ == "__main__":
             commasplit = cmd.split(",")
             message = commasplit[0].split(" ")[1]
             print("PRINT: " + message)
+        elif cmd.startswith("PRESS KEY"):
+            commasplit = cmd.split(",")
+            key = commasplit[0].split(" ")[1]
+            _crawler.press_key(key)
+        elif cmd.startswith("OPEN"):
+            url = cmd.split(" ")[1]
+            _crawler.go_to_page(url)
         elif cmd.startswith("TYPE"):
             spacesplit = cmd.split(" ")
             id = spacesplit[1]
@@ -632,12 +644,16 @@ if __name__ == "__main__":
             )
             gpt_cmd = gpt_cmd.strip()
 
+            gpt_cmds = gpt_cmd.split("\n")
+
             if not quiet:
                 print("URL: " + _crawler.page.url)
                 print("Objective: " + objective)
                 print("----------------\n" + browser_content + "\n----------------\n")
             if len(gpt_cmd) > 0:
-                print("Suggested command: " + gpt_cmd)
+                for cmd in gpt_cmds:
+                    print("GPT: " + cmd)
+                    run_cmd(cmd)
 
             command = input()
             if command == "r" or command == "":
